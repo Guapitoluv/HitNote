@@ -1,0 +1,184 @@
+html {
+  touch-action: manipulation;
+}
+
+body {
+  background-color: black;
+  min-height: 100vh;
+}
+
+header {
+  align-items: center;
+  background-color: black;
+  border: 2px solid white;
+  display: flex;
+  height: 100px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+footer {
+  margin-top: 90%;
+}
+
+footer p {
+  color: gray;
+  justify-self: center;
+}
+
+h1 {
+  color: white;
+}
+
+h2 {
+  color: white;
+}
+
+section {
+  border: 2px solid white;
+  justify-self: center;
+  width: 60%;
+  padding: 10px 40px;
+}
+
+.piano {
+  align-items: flex-start;
+  background-color: black;
+  display: flex;
+  height: 260px;
+  justify-content: center;
+  justify-self: center;
+  list-style: none;
+  margin: 40px;
+  padding: 0px;
+  position: relative;
+}
+
+.natural {
+  background-color: white;
+  position: relative;
+  width: 50px;
+  height: 260px;
+  border: 1px solid black;
+  border-radius: 0 0 8px 8px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 10px;
+}
+
+.note.active {
+  background-color: gray;
+}
+
+.sharp {
+  background-color: black;
+  
+  position: absolute;
+  width: 40px;
+  height: 140px;
+  background: black;
+  z-index: 10;
+  border-radius: 0 0 6px 6px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 10px;
+  color: white;
+}
+
+.note .symbol {
+  margin-top: auto;
+  margin-bottom: 10px;
+}
+
+.displays {
+  align-items: center;
+  background-color: white;
+  border-radius: 10px;
+  column-count: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  list-style: none;
+  margin: 40px;
+  margin-bottom: 10px;
+  padding: 20px;
+}
+
+.displays li {
+  border-radius: 10px;
+  border: 3px solid black;
+  display: flex;
+  justify-content: center;
+  padding: 5px 10px;
+  width: 90%;
+}
+
+.buttons {
+  border: 2px solid white;
+  flex-wrap: wrap;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  list-style: none inside;
+  margin: 10px 40px;
+}
+
+button, a {
+  background-color: white;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  justify-content: center;
+  justify-self: center;
+  margin: 10px;
+  padding: 10px;
+  transition-duration: 0.5s;
+  white-space: nowrap;
+}
+
+button:active {
+  background-color: orange;
+  padding: 5px;
+}
+
+.results {
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  justify-self: center;
+  margin: 10px;
+  padding: 10px;
+  width: 60%;
+}
+
+.selections {
+  border: 2px solid white;
+  flex-wrap: wrap;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 10px;
+  list-style: none inside;
+  margin: 10px 40px;
+}
+
+select {
+  border-radius: 2.5px;
+  border: none;
+  padding: 5px;
+}
+
+.game-modes {
+  list-style: none inside;
+  padding: 10px;
+}
+
+a {
+  color: black;
+  width: 90%;
+}
+

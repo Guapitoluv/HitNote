@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1."> -->
+  <link rel="stylesheet" href="../css/main.css">
+  <title>HitNote</title>
+</head>
+
+<body>
+  <header>
+    <h1>Hitnote</h1>
+  </header>
+  
+  <main>
+    <ul class="displays">
+      <li>Played note:&nbsp;<span class="played-note">None</span></li>
+      <li class="game-mode">Rounds:&nbsp;<span class="rounds">1</span></li>
+      <li class="game-mode">score:&nbsp;<span class="score">0</span></li>
+      <li class="game-mode">percentage:&nbsp;<span class="percentage">0.00</span>%</li>
+    </ul>
+    
+    <div class="results"></div>
+    
+    <ul class="buttons">
+      <li><button class="free-mode">Free Mode</button></li>
+      <li class="game-mode"><button class="restart">Restart</button></li>
+      <li class="game-mode"><button class="repeat">Repeat</button></li>
+      <li class="game-mode"><button class="new-note">New Note</button></li>
+      <li class="game-mode"><button class="chord-mode">Chord Mode</button></li>
+      <li><button class="deactivate-notes">Deactivate Notes</button></li>
+    </ul>
+    
+    <ul class="selections">
+      <li>
+        <select class="tonic-note">
+          <option>C</option>
+          <option>C#</option>
+          <option>D</option>
+          <option>D#</option>
+          <option>E</option>
+          <option>F</option>
+          <option>F#</option>
+          <option>G</option>
+          <option>G#</option>
+          <option>A</option>
+          <option>A#</option>
+          <option>B</option>
+        </select>
+      </li>
+      
+      <li>
+        <select class="scale">
+          <option>Chromatic</option>
+          <option>Major</option>
+          <option>Minor</option>
+        </select>
+      </li>
+    </ul>
+  </main>
+  
+  <footer>
+    <p>HitNote&copy; - Created by Guilherme Aryel -06/05/2026</p>
+  </footer>
+</body>
+
+<script type="module" src="../js/render_piano.js"></script>
+  
+</html>
