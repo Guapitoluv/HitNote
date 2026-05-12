@@ -1,12 +1,24 @@
-export class Piano {
+import {
+    Note
+} from "../js/note.js";
+
+import {
+    EventEmitter
+} from "./event_emitter.js";
+
+
+export class Piano extends EventEmitter {
     constructor(octaves=1, soundMaker) {
+        super();
         this.piano=null;
-        this.octaves=octaves;
+        this.octavesQuantity=octaves;
+        this.octaves=[];
         this.notes={};
-        this.activeNoteEvents=[];
-        this.deactiveNoteEvents=[];
+        this.naturalNotes={};
+        this.sharpNotes={};
         this.hightlightedNotes=[]
         this.soundMaker=soundMaker;
+        this.globalWhiteIndex=0;
         
         this.notesNames = [
             "C", "C#", "D",
@@ -19,14 +31,22 @@ export class Piano {
     }
     
     
+    setNotesColors(noteColors, type="all") {
+        const types=new Map([
+            ["all", this.notes],
+            ["sharp", this.sharpNotes],
+            ["natural", this.naturalNotes]
+        ]);
+        const notes=types.get(type);
+        Object.entries(noteColors).forEach(([name, color]) => {
+            notes[name].setColor(color);
+        });
+    }
+    
+    
     highlightNotes(notesNames) {
-        console.log(notesNames);
         Object.entries(this.notes).forEach(([noteName, note]) => {
-            console.log(noteName);
-            this.notes[noteName].querySelector(".symbol").style
-                .textDecoration=(notesNames.includes(noteName))
-                    ?"underline"
-                    :"none";
+            this.notes[noteName].setHighlight(notesNames.includes(noteName));
         });
         this.hightlightedNotes=
             this.hightlightedNotes.filter(n => notesNames.includes(n))
@@ -35,15 +55,20 @@ export class Piano {
 
     buildNotes() {
         this.notes={};
+        this.sharpNotes={};
+        this.naturalNotes={};
         
-        for (let octave=1;octave<=this.octaves;octave++) {
+        for (let octave=1;octave<=this.octavesQuantity;octave++) {
             this.notesNames.forEach(noteName => {
                 
                 const fullName=
-                    (this.octaves===1)
+                    (this.octavesQuantity===1)
                         ? noteName
                         : `${noteName}${octave}`;
                 
+                if (fullName.includes("#"))
+                    this.sharpNotes[fullName]=null;
+                else this.naturalNotes[fullName]=null;
                 this.notes[fullName]=null;
             });
         }
@@ -51,8 +76,8 @@ export class Piano {
 
 
     rescaleTo(octaves, reference=null) {
-        if (this.octaves!==octaves) {
-            this.octaves=octaves;
+        if (this.octavesQuantity!==octaves) {
+            this.octavesQuantity=octaves;
             this.buildNotes();
         }
         
@@ -64,10 +89,10 @@ export class Piano {
         if (this.piano) this.piano.remove();
         
         this.piano=document.createElement("ul");
-        
         this.piano.classList.add("piano");
-        
-        this.createNotes();
+        this.octaves=[]
+        this.globalWhiteIndex=0;
+        this.createOctaves();
         this.setEvents();
 
         if (reference===null) document.body.append(this.piano);
@@ -75,47 +100,46 @@ export class Piano {
     }
 
 
-    createNotes() {
-        let whiteIndex=0;
-
-        Object.keys(this.notes).forEach(noteName => {
-            
-            const note=
-                document.createElement("li");
-            
-            const symbol=
-                document.createElement("span");
-            
-            note.classList.add("note", noteName);
-            
-            symbol.classList.add("symbol");
-            
-            symbol.textContent=noteName;
-            
-            note.append(symbol);
-            
+    createNotes(octaveElement, octaveIndex) {
+        this.globalWhiteIndex=0;
+        this.notesNames.forEach(noteName => {
+            if (this.octavesQuantity>1)
+                noteName=`${noteName}${octaveIndex}`;
             const isSharp=
                 noteName.includes("#");
-            
+            let note;
             
             if (isSharp) {
-                
-                note.classList.add("sharp");
-                
-                note.style.left=
-                    `${(whiteIndex*50)-20}px`;
-                    
+                const spacement=
+                    `${(this.globalWhiteIndex*50)-20}px`;
+                note=
+                    new Note(noteName, "black");
+                note.render(spacement);
+                this.sharpNotes[noteName]=note;
             } else {
-                
-                note.classList.add("natural");
-                
-                whiteIndex++;
+                note=
+                    new Note(noteName, "white");
+                note.render();
+                this.naturalNotes[noteName]=note;
+                this.globalWhiteIndex++;
             }
-
-            this.piano.append(note);
             
+            note.appendToParent(octaveElement);
             this.notes[noteName]=note;
         });
+    }
+    
+    createOctaves() {
+        for (let i=0;i<this.octavesQuantity;i++) {
+            const octaveContainer=document.createElement("li");
+            const octave=document.createElement("ul");
+            octaveContainer.classList.add("octaves-container");
+            octave.classList.add("octave");
+            this.createNotes(octave, i+1);
+            octaveContainer.append(octave);
+            this.octaves.push(octave);
+            this.piano.append(octaveContainer);
+        }
     }
     
     
@@ -131,8 +155,8 @@ export class Piano {
     playNote(noteName) {
         this.soundMaker.playNote(noteName);
     }
-
-
+    
+    
     setEvents() {
         const activePointers={};
         
@@ -140,34 +164,36 @@ export class Piano {
             if (!note) return;
             
             note.classList.add("active");
+            const noteName=note.dataset.name;
             
-            const noteName=
-                note.querySelector(".symbol")
-                    .textContent;
-            
+            if (!noteName)
+                throw new Error("Invalid noteName");
             
             this.playNote(noteName);
-            
-            
-            this.activeNoteEvents.forEach(event => {
-                event(note);
-            });
+            this.emit("noteon", note);
         };
         
+        const deactivatePointer=(pointerId) => {
+            const note=
+                activePointers[pointerId];
+            
+            if (!note) return;
+            
+            note.classList.remove("active");
+            
+            const noteName=note.dataset.name;
+            if (!noteName)
+                throw new Error("Invalid noteName");
+            
+            this.stopNote(noteName);
+            this.emit("noteoff", note);
+            
+            delete activePointers[pointerId];
+        };
         
         this.piano.addEventListener("pointerdown", (e) => {
-            
-            if (
-                e.target.hasPointerCapture?.(
-                    e.pointerId
-                )
-            ) {
-                
-                e.target.releasePointerCapture(
-                    e.pointerId
-                );
-            }
-            
+            //if (e.target.hasPointerCapture?.(e.pointerId))
+                //e.target.releasePointerCapture(e.pointerId);
             
             const note=
                 e.target.closest(".note");
@@ -175,10 +201,8 @@ export class Piano {
             if (!note) return;
             
             activePointers[e.pointerId]=note;
-            
             activateNote(note);
         });
-        
         
         this.piano.addEventListener("pointermove", (e) => {
             const previousNote=
@@ -187,70 +211,45 @@ export class Piano {
             if (!previousNote) return;
             
             const element=
-                document.elementFromPoint(
+                e.target.ownerDocument.elementFromPoint(
                     e.clientX,
                     e.clientY
                 );
             
-            if (!element) return;
-            
-            
             const note=
-                element.closest(".note");
+                element?.closest(".note");
             
-            if (!note) return;
+            if (!note) {
+                deactivatePointer(e.pointerId);
+                return;
+            }
             
             if (note===previousNote) return;
             
-            this.deactiveNoteEvents.forEach(event => event(previousNote));
             previousNote.classList.remove("active");
             
-            
-            const previousName=
-                previousNote.querySelector(".symbol")
-                    .textContent;
-            
-            
+            const previousName=previousNote.dataset.name;
             this.stopNote(previousName);
-            
+            this.emit("noteoff", previousNote);
             
             activePointers[e.pointerId]=note;
-            
             activateNote(note);
         });
         
         
         window.addEventListener("pointerup", (e) => {
-            const note=
-                activePointers[e.pointerId];
-            
-            if (!note) return;
-            
-            note.classList.remove("active");
-            
-            const noteName=
-                note.querySelector(".symbol").textContent;
-            
-            this.deactiveNoteEvents.forEach(event => event(note));
-            
-            this.stopNote(noteName);
-            delete activePointers[e.pointerId];
+            deactivatePointer(e.pointerId);
+        });
+        
+        window.addEventListener("pointercancel", (e) => {
+            deactivatePointer(e.pointerId);
         });
     }
     
     
     deactivateAllNotes() {
         Object.values(this.notes).forEach(note => {
-            if (note) note.classList.remove("active");
+            if (note) note.deactivate();
         });
-    }
-    
-    
-    addActiveNoteEvent(event) {
-        this.activeNoteEvents.push(event);
-    }
-    
-    addDeactiveNoteEvent(event) {
-        this.deactiveNoteEvents.push(event);
     }
 }

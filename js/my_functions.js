@@ -1,8 +1,5 @@
-export function updateLayout(piano) {
-    const scale=
-        window.innerWidth>500?2:1;
-    
-    piano.rescaleTo(scale, document.getElementsByTagName("main")[0]);
+export function updateLayout(piano, octaves=1) {
+    piano.rescaleTo(octaves, document.getElementsByTagName("main")[0]);
 }
 
 
@@ -29,7 +26,9 @@ export function getRandomInt(min, max) {
 
 export function randNote(piano, tonicNote="C", scale="chr") {
     let notesNames=Object.keys(piano.notes);
-    const tonicIndex=notesNames.indexOf(tonicNote);
+    let tonicIndex=notesNames.indexOf(tonicNote);
+    if (tonicIndex===-1) tonicIndex=notesNames.indexOf(tonicNote+1);
+    console.log(tonicIndex);
     const newNotesNames=[];
     notesNames=[...notesNames.slice(tonicIndex),
                 ...notesNames.slice(0, tonicIndex)]
@@ -40,10 +39,10 @@ export function randNote(piano, tonicNote="C", scale="chr") {
             for (let i=0;i<notesNames.length;i++) {
                 if (majorNotes.includes(i)) newNotesNames.push(notesNames[i]);
             }
-            console.log(newNotesNames);
             notesNames=newNotesNames.slice();
             break;
     }
     
+    console.log(`notesNames: ${notesNames}`);
     return notesNames[getRandomInt(0, notesNames.length-1)];
 }

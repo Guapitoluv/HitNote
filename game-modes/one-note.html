@@ -9,8 +9,12 @@
   <title>HitNote</title>
 </head>
 
-<body>
+<body data-theme="default">
   <header>
+    <a class="home" href="../index.html">
+      <img class="home" src="../midia/home.png" alt="House icon">
+    </a>
+    
     <h1>Hitnote</h1>
   </header>
   
@@ -18,8 +22,8 @@
     <ul class="displays">
       <li>Played note:&nbsp;<span class="played-note">None</span></li>
       <li class="game-mode">Rounds:&nbsp;<span class="rounds">1</span></li>
-      <li class="game-mode">score:&nbsp;<span class="score">0</span></li>
-      <li class="game-mode">percentage:&nbsp;<span class="percentage">0.00</span>%</li>
+      <li class="game-mode">Score:&nbsp;<span class="score">0</span></li>
+      <li class="game-mode">Percentage:&nbsp;<span class="percentage">0.00</span>%</li>
     </ul>
     
     <div class="results"></div>
@@ -29,12 +33,13 @@
       <li class="game-mode"><button class="restart">Restart</button></li>
       <li class="game-mode"><button class="repeat">Repeat</button></li>
       <li class="game-mode"><button class="new-note">New Note</button></li>
-      <li class="game-mode"><button class="chord-mode">Chord Mode</button></li>
+      <li class="game-mode"><button class="chord-mode">Active Chord Mode</button></li>
       <li><button class="deactivate-notes">Deactivate Notes</button></li>
     </ul>
     
     <ul class="selections">
       <li>
+        <p>Tonic note:</p>
         <select class="tonic-note">
           <option>C</option>
           <option>C#</option>
@@ -52,10 +57,32 @@
       </li>
       
       <li>
+        <p>Scale:</p>
         <select class="scale">
           <option>Chromatic</option>
           <option>Major</option>
           <option>Minor</option>
+        </select>
+      </li>
+      
+      <li>
+        <p>Octaves:</p><input class="octaves-changer" type="number" value="2", min="1", max="4">
+      </li>
+      
+      <li>
+        <p>Theme:</p>
+        <select class="theme">
+          <option>Default</option>
+          <option>Light Milk</option>
+          <option>Wood</option>
+        </select>
+      </li>
+      
+      <li>
+        <p>Piano color:</p>
+        <select class="piano-colors">
+          <option>Black and White</option>
+          <option>Rainbow</option>
         </select>
       </li>
     </ul>
@@ -66,6 +93,6 @@
   </footer>
 </body>
 
-<script type="module" src="../js/render_piano.js"></script>
+<script type="module" src="../js/main.js"></script>
   
 </html>
