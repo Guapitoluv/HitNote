@@ -155,9 +155,7 @@ ui.buttons.repeat.addEventListener("click", () => {
     else soundMaker.playDuring(state.chosenNote, 75);
 })
 
-ui.buttons.newNote.addEventListener("click", () => {
-    generateRound();
-});
+ui.buttons.newNote.addEventListener("click", () => generateRound());
 
 ui.buttons.deactivateNotes.addEventListener("click", () => {
     piano.deactivateAllNotes();
