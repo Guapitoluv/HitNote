@@ -1,4 +1,5 @@
 const selectors={
+    //Buttons
     restart: ".restart",
     repeat: ".repeat",
     newNote: ".new-note",
@@ -6,14 +7,22 @@ const selectors={
     deactivateNotes: ".deactivate-notes",
     chordMode: ".chord-mode",
     playedNote: ".played-note",
+    
+    //Displays
     score: ".score",
     results: ".results",
     rounds: ".rounds",
     percentage: ".percentage",
     tonicNote: ".tonic-note",
     scale: ".scale",
+    
+    //Selections
     theme: ".theme",
-    pianoColors: ".piano-colors"
+    pianoColors: ".piano-colors",
+    
+    //Number inputs (containers)
+    octaves: ".octaves-changer",
+    firstOctave: ".first-octave"
 }
 
 export const ui={};
@@ -50,5 +59,10 @@ export function initializeUI() {
         scale: required(selectors.scale),
         theme: required(selectors.theme),
         pianoColors: required(selectors.pianoColors)
+    }
+    
+    ui.numberInputs={
+        octaves: required(selectors.octaves),
+        firstOctave: required(selectors.firstOctave)
     }
 }

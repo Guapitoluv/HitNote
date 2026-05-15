@@ -1,5 +1,12 @@
-export function updateLayout(piano, octaves=1) {
-    piano.rescaleTo(octaves, document.getElementsByTagName("main")[0]);
+import { state } from "./session_state.js";
+import { getScaleNotes } from "./session_aux.js";
+
+export function updateLayout(piano) {
+    piano.rescaleTo(state.octaves, document.getElementsByTagName("main")[0]);
+    const scale=getScaleNotes(piano,
+                              state.scale,
+                              state.tonicNote);
+    piano.highlightNotes(scale); // <- error here
 }
 
 
@@ -28,7 +35,6 @@ export function randNote(piano, tonicNote="C", scale="chr") {
     let notesNames=Object.keys(piano.notes);
     let tonicIndex=notesNames.indexOf(tonicNote);
     if (tonicIndex===-1) tonicIndex=notesNames.indexOf(tonicNote+1);
-    console.log(tonicIndex);
     const newNotesNames=[];
     notesNames=[...notesNames.slice(tonicIndex),
                 ...notesNames.slice(0, tonicIndex)]
@@ -43,6 +49,5 @@ export function randNote(piano, tonicNote="C", scale="chr") {
             break;
     }
     
-    console.log(`notesNames: ${notesNames}`);
     return notesNames[getRandomInt(0, notesNames.length-1)];
 }

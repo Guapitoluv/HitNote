@@ -38,35 +38,33 @@ function abbreviateScale(scaleName) {
     return scaleAbbr;
 }
 
+const majorScale=[0, 2, 4, 5, 7, 9, 11]
 
 export function getScaleNotes(piano, scaleName, tonicNote) {
-    const majorScale=[0, 2, 4, 5, 7, 9, 11]
     const notes=Object.keys(piano.notes);
-    let j=0;
-    
+    let XScale=null;
     let scale=[];
     
-    if (!notes.includes(tonicNote)) {
-        for (let i=0;i<(notes.length/12);i++) {
-            const tonicNoteIndex=notes.indexOf(tonicNote+(i+1));
-            let scale1=[...notes.slice(tonicNoteIndex, i*12+12),
-                         ...notes.slice(i*12, tonicNoteIndex)];
-            j=0;
-            switch (scaleName) {
-                case "chr": return scale1.slice();
-                case "M": scale=[...scale, ...scale1.filter(note => majorScale.includes(j++))];
-            }
+    for (let i=0;i<(notes.length/12);i++) {
+        if (scaleName==="chr") {
+            scale.push(tonicNote+(i+1));
+            continue;
         }
-        return scale;
+        
+        const tonicNoteIndex=notes.indexOf(tonicNote+(i+1));
+        let scale1=[...notes.slice(tonicNoteIndex, i*12+12),
+                    ...notes.slice(i*12, tonicNoteIndex)];
+        
+        switch (scaleName) {
+            case "M": XScale=majorScale; break;
+        }
+        
+        for (let note of XScale) {
+            scale.push(scale1[note]);
+        }
     }
     
-    const tonicNoteIndex=notes.indexOf(tonicNote);
-    scale=[...notes.slice(tonicNoteIndex),
-           ...notes.slice(0, tonicNoteIndex)];
-    
-    switch (scaleName) {
-        case "M": return scale.filter(note => majorScale.includes(j++));
-    }
+    return scale;
 }
 
 export class Session {

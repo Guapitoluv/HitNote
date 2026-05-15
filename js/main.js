@@ -4,6 +4,7 @@ import { SoundMaker } from "./sound_maker.js";
 import { changeTheme } from "./appearance.js";
 import { ui, initializeUI } from "./ui.js";
 import { changePianoColor } from "./color_functions.js";
+import { loadNumberInputs } from "./load_number_inputs.js";
 import {
     randNote,
     makeChord,
@@ -18,15 +19,17 @@ import {
     setTheme
 } from "./session_aux.js";
 
-setTimeout(() => {
-    new SoundMaker().playSequencially(["C", "D", "E"], 100);
-}, 1000);
+// the gray color don't active when note is on when you change piano color
+// resolve tge !important in css after
 
-function playErrorSound() {
-    ["C", "F#"].forEach(note => soundMaker.playDuring(note, 100));
-}
+const soundMaker=
+    new SoundMaker();
 
 let warningTimeout=null;
+
+function playErrorSound() {
+    soundMaker.playNotes(["C", "F#"], 75);
+}
 
 function activeWarningBox(text, color) {
     clearTimeout(warningTimeout);
@@ -70,8 +73,6 @@ setPianoColor();
 setTheme();
 
 //Classes
-const soundMaker=
-    new SoundMaker();
 const piano=
     new Piano(1, soundMaker);
 const session=
@@ -178,23 +179,26 @@ ui.buttons.chordMode.addEventListener("click", () => {
 
 const activeNotes=new Set();
 
-piano.on("noteon", note => {
+function noteonEvent(note) {
     const noteName=note.dataset.name;
     if (!noteName)
         throw new Error("Invalid noteName");
     
-    if (ui.displays.playedNote.textContent.includes("None"))
-        ui.displays.playedNote.textContent=noteName;
-    else ui.displays.playedNote.textContent+=" "+noteName;
+    const playingNotes=ui.displays.playedNote.textContent;
+    const isAllOff=playingNotes.includes("None");
+    
+    ui.displays.playedNote.textContent=
+        (isAllOff)?noteName:playingNotes+" "+noteName;
     
     if (state.mode!=="free") {
-        const intRounds=parseInt(ui.displays.rounds.textContent)+1;
+        const intRounds=parseInt(ui.displays.rounds.textContent);
         let intScore=parseInt(ui.displays.score.textContent)
         
         if (state.mode==="chord") {
             activeNotes.add(noteName);
+            
             if (activeNotes.size===3) {
-                ui.displays.rounds.textContent=`${intRounds}`;
+                ui.displays.rounds.textContent=`${++intRounds}`;
                 if ([...activeNotes].every(name => state.chosenChord.includes(name))) {
                     ui.displays.results.textContent="Correct";
                     ui.displays.results.style.backgroundColor="green";
@@ -204,14 +208,9 @@ piano.on("noteon", note => {
                     ui.displays.results.style.backgroundColor="red";
                 }
                 state.chosenChord=[];
-                setTimeout(() => {
-                    session.randChord();
-                }, 1000);
             }
-            ui.displays.percentage.textContent=`${(intScore*100/intRounds).toFixed(2)}`;
-            return;
         } else {
-            ui.displays.rounds.textContent=`${intRounds}`;
+            ui.displays.rounds.textContent=`${++intRounds}`;
             
             if (state.chosenNote===noteName) {
                 ui.displays.results.textContent="Correct";
@@ -223,100 +222,28 @@ piano.on("noteon", note => {
             }
         }
         
-        ui.displays.percentage.textContent=`${(intScore*100/intRounds).toFixed(2)}`;
-        
-        setTimeout(() => {
-            session.randNote();
-        }, 1000);
+        ui.displays.percentage.textContent=
+            `${(intScore*100/intRounds).toFixed(2)}`;
+        setTimeout(generateRound, 1000);
     }
-});
+}
 
-piano.on("noteoff", note => {
+piano.on("noteon", noteonEvent);
+
+
+function noteoffEvent(note) {
     const noteName=note.dataset.name;
     if (!noteName)
         throw new Error("Invalid noteName");
     
-    console.log(`${noteName} is deactive`)
     const notes=ui.displays.playedNote.textContent.split(" ").filter(n => n!==noteName);
     activeNotes.delete(noteName);
     
-    if (notes.length>0) ui.displays.playedNote.textContent=notes.join(" ");
-    else ui.displays.playedNote.textContent="None";
-});
+    ui.displays.playedNote.textContent=
+        (notes.length>0)?notes.join(" "):"None";
+} 
+
+piano.on("noteoff", noteoffEvent);
 
 updateLayout(piano, 2);
-
-const numberInputs=document.querySelectorAll("input[type='number']");
-
-numberInputs.forEach(input => {
-    const container=document.createElement("div");
-    const addBtn=document.createElement("button");
-    const subBtn=document.createElement("button");
-    
-    container.classList.add("number-input-container");
-    addBtn.classList.add("add-btn");
-    subBtn.classList.add("sub-btn");
-    
-    addBtn.textContent="+";
-    subBtn.textContent="-";
-    
-    input.setAttribute("readonly", "");
-    
-    input.replaceWith(container);
-    container.appendChild(subBtn);
-    container.appendChild(input);
-    container.appendChild(addBtn);
-    
-    let currValue=2;
-    let lastX=null;
-    let dragging=false;
-    
-    input.addEventListener("pointerdown", (e) => {
-        dragging=true;
-        lastX=e.clientX;
-        
-        input.setPointerCapture(e.pointerId);
-    });
-    
-    input.addEventListener("pointerup", (e) => {
-        dragging=false;
-        lastX=null;
-        
-        input.releasePointerCapture(e.pointerId);
-    });
-        
-    input.addEventListener("pointermove", (e) => {
-        if (!dragging) return;
-        
-        const delta=e.clientX-lastX;
-        if (delta>5&&currValue<4) {
-            currValue++;
-            lastX=e.clientX;
-            input.value=currValue;
-            updateLayout(piano, currValue);
-        } else if (delta<-5&&currValue>1) {
-            currValue--;
-            lastX=e.clientX;
-            input.value=currValue;
-            updateLayout(piano, currValue);
-        }
-    });
-    
-    addBtn.addEventListener("click", () => {
-        const currValue=parseInt(input.value);
-        if (currValue<input.max) {
-            input.value=String(currValue+1);
-            updateLayout(piano, currValue+1);
-            changePianoColor(piano, state.pianoColor);
-        }
-    })
-    
-    subBtn.addEventListener("click", () => {
-        const currValue=parseInt(input.value);
-        if (currValue>input.min) {
-            input.value=String(currValue-1);
-            updateLayout(piano, currValue-1);
-            changePianoColor(piano, state.pianoColor);
-        }
-    })
-});
+loadNumberInputs(piano);

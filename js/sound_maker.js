@@ -3,18 +3,9 @@ import { frequencies } from "../js/frequencies.js";
 const audioContext=
     new AudioContext();
 
-const delay=ms => new Promise(res => setTimeout(res, ms));
-
-async function playNotes(sm, notes, duration) {
-    for (const note of notes) {
-        sm.playDuring(note, duration);
-        await delay(duration);
-    }
-}
-
 export class SoundMaker {
     constructor() {
-    this.activeOscillators={};
+        this.activeOscillators={};
     }
     
     stopNote(noteName) {  
@@ -139,6 +130,15 @@ export class SoundMaker {
     }
     
     
+    playNotes(notes, duration=null) {
+        for (let note of notes) {
+            if (duration===null)
+                this.playNote(note);
+            else this.playDuring(note, duration);
+        }
+    }
+    
+    
     playDuring(noteName, duration) {  
         if (typeof noteName==="string")
             noteName=[noteName];
@@ -149,26 +149,19 @@ export class SoundMaker {
     }
     
     
-    playSequencially(notes, duration=null, type="arr") {
-        if (type==="arr") {
-            console.log("arr")
-            if (duration===null)
-                throw new Error("No duration was given");
-            
-            playNotes(this, notes, duration);
+    playSequentially(notes, duration) {
+        if (Array.isArray(notes)) {
+            let i=0;
+            const intervalId=setInterval(() => {
+                if (notes.length===i) clearInterval(intervalId);
+                this.playDuring(notes[i++], duration);
+            }, duration);
             return;
         }
         
-        console.log("obj");
-        
-        Object.keys(notes).forEach(note => {
-            let currDuration=notes[note];
-            if (notes[note]===null) {
-                if (duration===null)
-                    throw new Error(`There's no duration to apply to ${note}`);
-                else currDuration=duration;
-            }
-            this.playDuring(note, currDuration);
+        Object.entries(notes).forEach(([note, dur]) => {
+            if (typeof dur!=="number") dur=duration;
+            this.playDuring(note, dur);
         });
     } 
 }

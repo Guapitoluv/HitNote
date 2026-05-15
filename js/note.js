@@ -36,6 +36,7 @@ export class Note {
     
     
     setColor(color) {
+        console.log("here");
         this.note.style.backgroundColor=color;
     }
     

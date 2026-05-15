@@ -91,13 +91,15 @@ section {
 }
 
 .sharp.active {
-  background-color: gray;
   height: 52%;
 }
 
 .natural.active {
-  background-color: gray;
   height: 98%;
+}
+
+.note.active {
+  background-color: gray !important;
 }
 
 .sharp {
@@ -323,6 +325,8 @@ a.home {
 
 .list li {
   background-color: #ffffff40;
-  text-align: center;
+  display: flex;
+  justify-content: center;
   padding: 1px;
+  flex-wrap: wrap;
 }

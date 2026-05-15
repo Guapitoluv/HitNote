@@ -46,7 +46,7 @@ export class Piano extends EventEmitter {
     
     highlightNotes(notesNames) {
         Object.entries(this.notes).forEach(([noteName, note]) => {
-            this.notes[noteName].setHighlight(notesNames.includes(noteName));
+            note.setHighlight(notesNames.includes(noteName));
         });
         this.hightlightedNotes=
             this.hightlightedNotes.filter(n => notesNames.includes(n))
@@ -54,32 +54,34 @@ export class Piano extends EventEmitter {
 
 
     buildNotes() {
+        // Role: Build the semantic notes (class)
         this.notes={};
         this.sharpNotes={};
         this.naturalNotes={};
         
         for (let octave=1;octave<=this.octavesQuantity;octave++) {
             this.notesNames.forEach(noteName => {
+                if (this.octavesQuantity!==1)
+                    noteName=`${noteName}${octave}`;
                 
-                const fullName=
-                    (this.octavesQuantity===1)
-                        ? noteName
-                        : `${noteName}${octave}`;
+                let note;
                 
-                if (fullName.includes("#"))
-                    this.sharpNotes[fullName]=null;
-                else this.naturalNotes[fullName]=null;
-                this.notes[fullName]=null;
+                if (noteName.includes("#")) {
+                    note=new Note(noteName, "black");
+                    this.sharpNotes[noteName]=note;
+                } else {
+                    note=new Note(noteName, "white");
+                    this.naturalNotes[noteName]=note;
+                }
+                this.notes[noteName]=note
             });
         }
     }
 
 
     rescaleTo(octaves, reference=null) {
-        if (this.octavesQuantity!==octaves) {
+        if (this.octavesQuantity!==octaves)
             this.octavesQuantity=octaves;
-            this.buildNotes();
-        }
         
         this.render(reference);
     }
@@ -92,6 +94,8 @@ export class Piano extends EventEmitter {
         this.piano.classList.add("piano");
         this.octaves=[]
         this.globalWhiteIndex=0;
+        
+        this.buildNotes();
         this.createOctaves();
         this.setEvents();
 
@@ -101,31 +105,21 @@ export class Piano extends EventEmitter {
 
 
     createNotes(octaveElement, octaveIndex) {
+        // Role: Build the DOM elements related to notes
         this.globalWhiteIndex=0;
-        this.notesNames.forEach(noteName => {
-            if (this.octavesQuantity>1)
-                noteName=`${noteName}${octaveIndex}`;
-            const isSharp=
-                noteName.includes("#");
-            let note;
-            
-            if (isSharp) {
-                const spacement=
-                    `${(this.globalWhiteIndex*50)-20}px`;
-                note=
-                    new Note(noteName, "black");
-                note.render(spacement);
-                this.sharpNotes[noteName]=note;
-            } else {
-                note=
-                    new Note(noteName, "white");
-                note.render();
-                this.naturalNotes[noteName]=note;
-                this.globalWhiteIndex++;
+        Object.values(this.notes).forEach(note => {
+            if ((note.name.includes(String(octaveIndex)))||(this.octavesQuantity===1)) {
+                if (note.name.includes("#")) {
+                    const spacement=
+                        `${(this.globalWhiteIndex*50)-20}px`;
+                    note.render(spacement);
+                } else {
+                    note.render();
+                    this.globalWhiteIndex++;
+                }
+                
+                note.appendToParent(octaveElement);
             }
-            
-            note.appendToParent(octaveElement);
-            this.notes[noteName]=note;
         });
     }
     
